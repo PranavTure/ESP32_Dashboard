@@ -7,29 +7,46 @@
 
 <body style="text-align:center; font-family:Arial;">
   <h1>ESP32 LED Control</h1>
-  <button id="btn" style="width:150px;height:60px;font-size:20px;background:red;color:white;">
+
+  <button id="btn"
+    style="width:150px;height:60px;font-size:20px;background:red;color:white;">
     OFF
   </button>
 
 <script>
-  const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+  const btn = document.getElementById("btn");
 
-  let state = false;
+  const client = mqtt.connect(
+    "wss://broker.hivemq.com:8000/mqtt",
+    {
+      clientId: "WebClient_" + Math.floor(Math.random() * 10000),
+      username: "pranav_user",
+      password: "mypassword123"
+    }
+  );
 
   client.on("connect", () => {
     console.log("Connected to MQTT");
+    client.subscribe("pranav/esp32/led");
   });
 
-  document.getElementById("btn").onclick = () => {
-    state = !state;
-    if(state){
-      client.publish("pranav/esp32/led", "ON");
+  client.on("message", (topic, message) => {
+    const msg = message.toString();
+
+    if (msg === "ON") {
       btn.innerText = "ON";
       btn.style.background = "green";
-    } else {
-      client.publish("pranav/esp32/led", "OFF");
+    } else if (msg === "OFF") {
       btn.innerText = "OFF";
       btn.style.background = "red";
+    }
+  });
+
+  btn.onclick = () => {
+    if (btn.innerText === "OFF") {
+      client.publish("pranav/esp32/led", "ON");
+    } else {
+      client.publish("pranav/esp32/led", "OFF");
     }
   };
 </script>
