@@ -1,52 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 Control</title>
+  <title>ESP32 LED Control</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 
-<body style="text-align:center; font-family:Arial;">
+<body style="text-align:center;font-family:Arial;">
   <h1>ESP32 LED Control</h1>
 
   <button id="btn"
-    style="width:150px;height:60px;font-size:20px;background:red;color:white;">
-    OFF
+    style="width:150px;height:60px;font-size:20px;background:gray;color:white;">
+    WAIT
   </button>
 
 <script>
   const btn = document.getElementById("btn");
 
-  const client = mqtt.connect(
-    "wss://broker.hivemq.com:8000/mqtt",
-    {
-      clientId: "WebClient_" + Math.floor(Math.random() * 10000),
-      username: "pranav_user",
-      password: "mypassword123"
-    }
-  );
-
-  client.on("connect", () => {
-    console.log("Connected to MQTT");
-    client.subscribe("pranav/esp32/led");
+  const client = mqtt.connect("wss://broker.hivemq.com:8000/mqtt", {
+    clientId: "WebClient_" + Math.floor(Math.random() * 10000)
   });
 
+  client.on("connect", () => {
+    console.log("Connected");
+    client.subscribe("pranav/esp32/led/state");
+  });
+
+  // ESP32 FEEDBACK (ONLY THIS changes button color)
   client.on("message", (topic, message) => {
     const msg = message.toString();
 
     if (msg === "ON") {
       btn.innerText = "ON";
       btn.style.background = "green";
-    } else if (msg === "OFF") {
+    } else {
       btn.innerText = "OFF";
       btn.style.background = "red";
     }
   });
 
+  // Send COMMAND only
   btn.onclick = () => {
-    if (btn.innerText === "OFF") {
-      client.publish("pranav/esp32/led", "ON");
+    if (btn.innerText === "ON") {
+      client.publish("pranav/esp32/led/cmd", "OFF");
     } else {
-      client.publish("pranav/esp32/led", "OFF");
+      client.publish("pranav/esp32/led/cmd", "ON");
     }
   };
 </script>
