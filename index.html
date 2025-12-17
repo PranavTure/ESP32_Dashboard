@@ -16,7 +16,7 @@
 <script>
   const btn = document.getElementById("btn");
 
-  const client = mqtt.connect("wss://broker.hivemq.com:8000/mqtt", {
+  const client = mqtt.connect("wss://broker.hivemq.com:8004/mqtt", {
     clientId: "WebClient_" + Math.floor(Math.random() * 10000)
   });
 
@@ -49,3 +49,4 @@
 </script>
 </body>
 </html>
+
