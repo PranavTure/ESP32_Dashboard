@@ -12,14 +12,21 @@
   </button>
 
 <script>
-  const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+  const btn = document.getElementById("btn");
 
-  let state = false;
-
-  client.on("connect", () => {
-    console.log("Connected to MQTT");
+  // const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+  
+  const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
+    clientId: "WebClient_" + Math.floor(Math.random() * 10000)
   });
 
+  // on connect
+  client.on("connect", () => {
+    console.log("Connected to MQTT");
+    client.subscribe("pranav/esp32/led/state");
+  });
+
+  /*
   document.getElementById("btn").onclick = () => {
     state = !state;
     if(state){
@@ -32,6 +39,34 @@
       btn.style.background = "red";
     }
   };
+  */
+
+  // esp32 feedback
+
+  client.on("message", (topic, message) => {
+    const msg = message.toString();
+
+    if (msg === "ON") {
+      btn.innerText = "ON";
+      btn.style.background = "green";
+    }
+    else if (msg === "OFF") {
+      btn.innerText = "OFF";
+      btn.style.background = "red";
+    }
+  });
+
+  // send command only
+
+  btn.onclick = () => {
+    if (btn.innerText === "ON") {
+      client.publish("pranav/esp32/led/cmd", "OFF");
+    } else {
+      client.publish("pranav/esp32/led/cmd", "ON");
+    }
+  };
+  client.on
 </script>
 </body>
 </html>
+
